@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LeetCode Progress Tracker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        leetcode: {
+                            easy: '#00B8A3',
+                            medium: '#FFC01E',
+                            hard: '#FF375F'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .pattern-section {
+            transition: all 0.3s ease;
+        }
+        .pattern-header {
+            cursor: pointer;
+        }
+        .problem-item {
+            transition: background-color 0.2s;
+        }
+        .problem-item:hover {
+            background-color: #f8f9fa;
+        }
+        [contenteditable="true"]:focus {
+            outline: none;
+            background-color: #f0f9ff;
+        }
+        .completed-problem {
+            background-color: #f0fdf4;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div class="container mx-auto px-4 py-8 max-w-6xl">
+        <!-- Header -->
+        <header class="text-center mb-8">
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-800 mb-2">LeetCode Progress Tracker</h1>
+            <p class="text-gray-600">Track your progress through 166 problems organized by pattern</p>
+            
+            <!-- Overall Progress -->
+            <div class="mt-6 bg-white rounded-lg shadow p-4 max-w-2xl mx-auto">
+                <div class="flex justify-between mb-2">
+                    <span class="font-medium">Overall Progress</span>
+                    <span id="overall-progress">0/166 (0%)</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-4">
+                    <div id="progress-bar" class="bg-leetcode-medium h-4 rounded-full transition-all duration-500" style="width: 0%"></div>
+                </div>
+                <div class="flex justify-between mt-4 text-sm">
+                    <span class="text-leetcode-easy"><i class="fas fa-circle"></i> Easy: <span id="easy-count">0</span></span>
+                    <span class="text-leetcode-medium"><i class="fas fa-circle"></i> Medium: <span id="medium-count">0</span></span>
+                    <span class="text-leetcode-hard"><i class="fas fa-circle"></i> Hard: <span id="hard-count">0</span></span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Filters -->
+        <div class="flex flex-wrap justify-center gap-4 mb-6">
+            <button class="filter-btn px-4 py-2 rounded-full bg-blue-100 text-blue-800 shadow text-sm font-medium transition-all hover:shadow-md active:scale-95" data-filter="all">
+                All Problems
+            </button>
+            <button class="filter-btn px-4 py-2 rounded-full bg-white shadow text-sm font-medium transition-all hover:shadow-md active:scale-95" data-filter="easy">
+                <span class="text-leetcode-easy">Easy</span>
+            </button>
+            <button class="filter-btn px-4 py-2 rounded-full bg-white shadow text-sm font-medium transition-all hover:shadow-md active:scale-95" data-filter="medium">
+                <span class="text-leetcode-medium">Medium</span>
+            </button>
+            <button class="filter-btn px-4 py-2 rounded-full bg-white shadow text-sm font-medium transition-all hover:shadow-md active:scale-95" data-filter="hard">
+                <span class="text-leetcode-hard">Hard</span>
+            </button>
+            <button class="filter-btn px-4 py-2 rounded-full bg-white shadow text-sm font-medium transition-all hover:shadow-md active:scale-95" data-filter="incomplete">
+                To Do
+            </button>
+            <button class="filter-btn px-4 py-2 rounded-full bg-white shadow text-sm font-medium transition-all hover:shadow-md active:scale-95" data-filter="complete">
+                Completed
+            </button>
+        </div>
+
+        <!-- Patterns Container -->
+        <div id="patterns-container" class="space-y-6">
+            <!-- Patterns will be generated here -->
+        </div>
+
+        <!-- Footer -->
+        <footer class="mt-12 text-center text-gray-500 text-sm">
+            <p>Good luck with your interview preparation! Remember, consistency is key.</p>
+            <p class="mt-2">Created with TailwindCSS • Data persists in local storage</p>
+        </footer>
+    </div>
+
+    <script>
+        // Problem data structure
+        const patterns = [
+            {
+                name: "Array & Hashing",
+                count: 15,
+                problems: [
+                    { number: 1, name: "Two Sum", difficulty: "easy" },
+                    { number: 217, name: "Contains Duplicate", difficulty: "easy" },
+                    { number: 242, name: "Valid Anagram", difficulty: "easy" },
+                    { number: 49, name: "Group Anagrams", difficulty: "medium" },
+                    { number: 347, name: "Top K Frequent Elements", difficulty: "medium" },
+                    { number: 238, name: "Product of Array Except Self", difficulty: "medium" },
+                    { number: 36, name: "Valid Sudoku", difficulty: "medium" },
+                    { number: 128, name: "Longest Consecutive Sequence", difficulty: "medium" },
+                    { number: 560, name: "Subarray Sum Equals K", difficulty: "medium" },
+                    { number: 41, name: "First Missing Positive", difficulty: "hard" },
+                    { number: 448, name: "Find All Numbers Disappeared in an Array", difficulty: "easy" },
+                    { number: 268, name: "Missing Number", difficulty: "easy" },
+                    { number: 287, name: "Find the Duplicate Number", difficulty: "medium" },
+                    { number: 229, name: "Majority Element II", difficulty: "medium" },
+                    { number: 523, name: "Continuous Subarray Sum", difficulty: "medium" }
+                ]
+            },
+            {
+                name: "Two Pointers",
+                count: 12,
+                problems: [
+                    { number: 125, name: "Valid Palindrome", difficulty: "easy" },
+                    { number: 167, name: "Two Sum II - Input Array Is Sorted", difficulty: "medium" },
+                    { number: 15, name: "3Sum", difficulty: "medium" },
+                    { number: 11, name: "Container With Most Water", difficulty: "medium" },
+                    { number: 42, name: "Trapping Rain Water", difficulty: "hard" },
+                    { number: 75, name: "Sort Colors", difficulty: "medium" },
+                    { number: 16, name: "3Sum Closest", difficulty: "medium" },
+                    { number: 18, name: "4Sum", difficulty: "medium" },
+                    { number: 26, name: "Remove Duplicates from Sorted Array", difficulty: "easy" },
+                    { number: 27, name: "Remove Element", difficulty: "easy" },
+                    { number: 283, name: "Move Zeroes", difficulty: "easy" },
+                    { number: 344, name: "Reverse String", difficulty: "easy" }
+                ]
+            },
+            {
+                name: "Sliding Window",
+                count: 12,
+                problems: [
+                    { number: 121, name: "Best Time to Buy and Sell Stock", difficulty: "easy" },
+                    { number: 3, name: "Longest Substring Without Repeating Characters", difficulty: "medium" },
+                    { number: 424, name: "Longest Repeating Character Replacement", difficulty: "medium" },
+                    { number: 76, name: "Minimum Window Substring", difficulty: "hard" },
+                    { number: 567, name: "Permutation in String", difficulty: "medium" },
+                    { number: 438, name: "Find All Anagrams in a String", difficulty: "medium" },
+                    { number: 209, name: "Minimum Size Subarray Sum", difficulty: "medium" },
+                    { number: 239, name: "Sliding Window Maximum", difficulty: "hard" },
+                    { number: 904, name: "Fruit Into Baskets", difficulty: "medium" },
+                    { number: 1004, name: "Max Consecutive Ones III", difficulty: "medium" },
+                    { number: 713, name: "Subarray Product Less Than K", difficulty: "medium" },
+                    { number: 340, name: "Longest Substring with At Most K Distinct Characters", difficulty: "medium" }
+                ]
+            },
+            {
+                name: "Stack",
+                count: 10,
+                problems: [
+                    { number: 20, name: "Valid Parentheses", difficulty: "easy" },
+                    { number: 155, name: "Min Stack", difficulty: "medium" },
+                    { number: 150, name: "Evaluate Reverse Polish Notation", difficulty: "medium" },
+                    { number: 22, name: "Generate Parentheses", difficulty: "medium" },
+                    { number: 739, name: "Daily Temperatures", difficulty: "medium" },
+                    { number: 853, name: "Car Fleet", difficulty: "medium" },
+                    { number: 84, name: "Largest Rectangle in Histogram", difficulty: "hard" },
+                    { number: 42, name: "Trapping Rain Water", difficulty: "hard" },
+                    { number: 394, name: "Decode String", difficulty: "medium" },
+                    { number: 71, name: "Simplify Path", difficulty: "medium" }
+                ]
+            },
+            {
+                name: "Binary Search",
+                count: 12,
+                problems: [
+                    { number: 704, name: "Binary Search", difficulty: "easy" },
+                    { number: 74, name: "Search a 2D Matrix", difficulty: "medium" },
+                    { number: 875, name: "Koko Eating Bananas", difficulty: "medium" },
+                    { number: 153, name: "Find Minimum in Rotated Sorted Array", difficulty: "medium" },
+                    { number: 33, name: "Search in Rotated Sorted Array", difficulty: "medium" },
+                    { number: 981, name: "Time Based Key-Value Store", difficulty: "medium" },
+                    { number: 4, name: "Median of Two Sorted Arrays", difficulty: "hard" },
+                    { number: 35, name: "Search Insert Position", difficulty: "easy" },
+                    { number: 162, name: "Find Peak Element", difficulty: "medium" },
+                    { number: 278, name: "First Bad Version", difficulty: "easy" },
+                    { number: 540, name: "Single Element in a Sorted Array", difficulty: "medium" },
+                    { number: 658, name: "Find K Closest Elements", difficulty: "medium" }
+                ]
+            },
+            {
+                name: "Linked List",
+                count: 10,
+                problems: [
+                    { number: 206, name: "Reverse Linked List", difficulty: "easy" },
+                    { number: 21, name: "Merge Two Sorted Lists", difficulty: "easy" },
+                    { number: 143, name: "Reorder List", difficulty: "medium" },
+                    { number: 19, name: "Remove Nth Node From End of List", difficulty: "medium" },
+                    { number: 138, name: "Copy List with Random Pointer", difficulty: "medium" },
+                    { number: 2, name: "Add Two Numbers", difficulty: "medium" },
+                    { number: 141, name: "Linked List Cycle", difficulty: "easy" },
+                    { number: 287, name: "Find the Duplicate Number", difficulty: "medium" },
+                    { number: 146, name: "LRU Cache", difficulty: "medium" },
+                    { number: 23, name: "Merge k Sorted Lists", difficulty: "hard" }
+                ]
+            },
+            {
+                name: "Trees",
+                count: 15,
+                problems: [
+                    { number: 226, name: "Invert Binary Tree", difficulty: "easy" },
+                    { number: 104, name: "Maximum Depth of Binary Tree", difficulty: "easy" },
+                    { number: 543, name: "Diameter of Binary Tree", difficulty: "easy" },
+                    { number: 110, name: "Balanced Binary Tree", difficulty: "easy" },
+                    { number: 100, name: "Same Tree", difficulty: "easy" },
+                    { number: 572, name: "Subtree of Another Tree", difficulty: "easy" },
+                    { number: 235, name: "Lowest Common Ancestor of a Binary Search Tree", difficulty: "medium" },
+                    { number: 102, name: "Binary Tree Level Order Traversal", difficulty: "medium" },
+                    { number: 199, name: "Binary Tree Right Side View", difficulty: "medium" },
+                    { number: 1448, name: "Count Good Nodes in Binary Tree", difficulty: "medium" },
+                    { number: 98, name: "Validate Binary Search Tree", difficulty: "medium" },
+                    { number: 230, name: "Kth Smallest Element in a BST", difficulty: "medium" },
+                    { number: 105, name: "Construct Binary Tree from Preorder and Inorder Traversal", difficulty: "medium" },
+                    { number: 124, name: "Binary Tree Maximum Path Sum", difficulty: "hard" },
+                    { number: 297, name: "Serialize and Deserialize Binary Tree", difficulty: "hard" }
+                ]
+            },
+            {
+                name: "Tries",
+                count: 5,
+                problems: [
+                    { number: 208, name: "Implement Trie (Prefix Tree)", difficulty: "medium" },
+                    { number: 211, name: "Design Add and Search Words Data Structure", difficulty: "medium" },
+                    { number: 212, name: "Word Search II", difficulty: "hard" },
+                    { number: 14, name: "Longest Common Prefix", difficulty: "easy" },
+                    { number: 648, name: "Replace Words", difficulty: "medium" }
+                ]
+            },
+            {
+                name: "Heap / Priority Queue",
+                count: 8,
+                problems: [
+                    { number: 703, name: "Kth Largest Element in a Stream", difficulty: "easy" },
+                    { number: 1046, name: "Last Stone Weight", difficulty: "easy" },
+                    { number: 973, name: "K Closest Points to Origin", difficulty: "medium" },
+                    { number: 215, name: "Kth Largest Element in an Array", difficulty: "medium" },
+                    { number: 621, name: "Task Scheduler", difficulty: "medium" },
+                    { number: 355, name: "Design Twitter", difficulty: "medium" },
+                    { number: 295, name: "Find Median from Data Stream", difficulty: "hard" }
+                ]
+            },
+            {
+                name: "Backtracking",
+                count: 8,
+                problems: [
+                    { number: 78, name: "Subsets", difficulty: "medium" },
+                    { number: 39, name: "Combination Sum", difficulty: "medium" },
+                    { number: 46, name: "Permutations", difficulty: "medium" },
+                    { number: 90, name: "Subsets II", difficulty: "medium" },
+                    { number: 40, name: "Combination Sum II", difficulty: "medium" },
+                    { number: 79, name: "Word Search", difficulty: "medium" },
+                    { number: 131, name: "Palindrome Partitioning", difficulty: "medium" },
+                    { number: 17, name: "Letter Combinations of a Phone Number", difficulty: "medium" }
+                ]
+            },
+            {
+                name: "Graphs",
+                count: 12,
+                problems: [
+                    { number: 200, name: "Number of Islands", difficulty: "medium" },
+                    { number: 133, name: "Clone Graph", difficulty: "medium" },
+                    { number: 695, name: "Max Area of Island", difficulty: "medium" },
+                    { number: 417, name: "Pacific Atlantic Water Flow", difficulty: "medium" },
+                    { number: 130, name: "Surrounded Regions", difficulty: "medium" },
+                    { number: 994, name: "Rotting Oranges", difficulty: "medium" },
+                    { number: 207, name: "Course Schedule", difficulty: "medium" },
+                    { number: 210, name: "Course Schedule II", difficulty: "medium" },
+                    { number: 684, name: "Redundant Connection", difficulty: "medium" },
+                    { number: 261, name: "Graph Valid Tree", difficulty: "medium" },
+                    { number: 323, name: "Number of Connected Components in an Undirected Graph", difficulty: "medium" },
+                    { number: 787, name: "Cheapest Flights Within K Stops", difficulty: "medium" }
+                ]
+            },
+            {
+                name: "Advanced Graphs",
+                count: 5,
+                problems: [
+                    { number: 743, name: "Network Delay Time", difficulty: "medium" },
+                    { number: 778, name: "Swim in Rising Water", difficulty: "hard" },
+                    { number: 269, name: "Alien Dictionary", difficulty: "hard" },
+                    { number: 332, name: "Reconstruct Itinerary", difficulty: "hard" },
+                    { number: 1584, name: "Min Cost to Connect All Points", difficulty: "medium" }
+                ]
+            },
+            {
+                name: "Dynamic Programming 1D",
+                count: 8,
+                problems: [
+                    { number: 70, name: "Climbing Stairs", difficulty: "easy" },
+                    { number: 198, name: "House Robber", difficulty: "medium" },
+                    { number: 213, name: "House Robber II", difficulty: "medium" },
+                    { number: 5, name: "Longest Palindromic Substring", difficulty: "medium" },
+                    { number: 647, name: "Palindromic Substrings", difficulty: "medium" },
+                    { number: 91, name: "Decode Ways", difficulty: "medium" },
+                    { number: 322, name: "Coin Change", difficulty: "medium" },
+                    { number: 300, name: "Longest Increasing Subsequence", difficulty: "medium" }
+                ]
+            },
+            {
+                name: "Dynamic Programming 2D",
+                count: 10,
+                problems: [
+                    { number: 62, name: "Unique Paths", difficulty: "medium" },
+                    { number: 1143, name: "Longest Common Subsequence", difficulty: "medium" },
+                    { number: 309, name: "Best Time to Buy and Sell Stock with Cooldown", difficulty: "medium" },
+                    { number: 518, name: "Coin Change 2", difficulty: "medium" },
+                    { number: 494, name: "Target Sum", difficulty: "medium" },
+                    { number: 97, name: "Interleaving String", difficulty: "medium" },
+                    { number: 329, name: "Longest Increasing Path in a Matrix", difficulty: "hard" },
+                    { number: 115, name: "Distinct Subsequences", difficulty: "hard" },
+                    { number: 72, name: "Edit Distance", difficulty: "hard" },
+                    { number: 312, name: "Burst Balloons", difficulty: "hard" }
+                ]
+            },
+            {
+                name: "Greedy",
+                count: 8,
+                problems: [
+                    { number: 53, name: "Maximum Subarray", difficulty: "medium" },
+                    { number: 55, name: "Jump Game", difficulty: "medium" },
+                    { number: 45, name: "Jump Game II", difficulty: "medium" },
+                    { number: 134, name: "Gas Station", difficulty: "medium" },
+                    { number: 846, name: "Hand of Straights", difficulty: "medium" },
+                    { number: 678, name: "Valid Parenthesis String", difficulty: "medium" },
+                    { number: 763, name: "Partition Labels", difficulty: "medium" },
+                    { number: 56, name: "Merge Intervals", difficulty: "medium" }
+                ]
+            },
+            {
+                name: "Intervals",
+                count: 6,
+                problems: [
+                    { number: 57, name: "Insert Interval", difficulty: "medium" },
+                    { number: 435, name: "Non-overlapping Intervals", difficulty: "medium" },
+                    { number: 252, name: "Meeting Rooms", difficulty: "easy" },
+                    { number: 253, name: "Meeting Rooms II", difficulty: "medium" },
+                    { number: 1851, name: "Minimum Interval to Include Each Query", difficulty: "hard" },
+                    { number: 986, name: "Interval List Intersections", difficulty: "medium" }
+                ]
+            },
+            {
+                name: "Math & Geometry",
+                count: 6,
+                problems: [
+                    { number: 202, name: "Happy Number", difficulty: "easy" },
+                    { number: 66, name: "Plus One", difficulty: "easy" },
+                    { number: 48, name: "Rotate Image", difficulty: "medium" },
+                    { number: 54, name: "Spiral Matrix", difficulty: "medium" },
+                    { number: 73, name: "Set Matrix Zeroes", difficulty: "medium" },
+                    { number: 50, name: "Pow(x, n)", difficulty: "medium" }
+                ]
+            },
+            {
+                name: "Bit Manipulation",
+                count: 5,
+                problems: [
+                    { number: 136, name: "Single Number", difficulty: "easy" },
+                    { number: 191, name: "Number of 1 Bits", difficulty: "easy" },
+                    { number: 338, name: "Counting Bits", difficulty: "easy" },
+                    { number: 268, name: "Missing Number", difficulty: "easy" },
+                    { number: 7, name: "Reverse Integer", difficulty: "medium" }
+                ]
+            }
+        ];
+
+        // Initialize the app
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load progress from local storage
+            loadProgress();
+            
+            // Render all patterns
+            renderPatterns();
+            
+            // Update overall progress
+            updateOverallProgress();
+            
+            // Add event listeners to filter buttons
+            document.querySelectorAll('.filter-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const filter = this.getAttribute('data-filter');
+                    filterProblems(filter);
+                });
+            });
+        });
+
+        // Load progress from local storage
+        function loadProgress() {
+            patterns.forEach(pattern => {
+                pattern.problems.forEach(problem => {
+                    const storedValue = localStorage.getItem(`problem-${problem.number}`);
+                    if (storedValue !== null) {
+                        problem.completed = storedValue === 'true';
+                    } else {
+                        problem.completed = false;
+                    }
+                });
+            });
+        }
+
+        // Save progress to local storage
+        function saveProgress(problemNumber, completed) {
+            localStorage.setItem(`problem-${problemNumber}`, completed);
+            updateOverallProgress();
+        }
+
+        // Render all patterns
+        function renderPatterns() {
+            const container = document.getElementById('patterns-container');
+            container.innerHTML = '';
+            
+            patterns.forEach(pattern => {
+                const patternElement = document.createElement('div');
+                patternElement.className = 'pattern-section bg-white rounded-lg shadow overflow-hidden';
+                
+                // Count completed problems in this pattern
+                const completedCount = pattern.problems.filter(p => p.completed).length;
+                
+                patternElement.innerHTML = `
+                    <div class="pattern-header p-4 border-b flex justify-between items-center">
+                        <h2 class="text-xl font-semibold">${pattern.name} (${completedCount}/${pattern.count})</h2>
+                        <span class="toggle-icon">▼</span>
+                    </div>
+                    <div class="pattern-problems">
+                        <div class="p-4 bg-gray-50">
+                            <div class="flex justify-between mb-2 text-sm">
+                                <span>Progress</span>
+                                <span>${Math.round((completedCount / pattern.count) * 100)}%</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div class="bg-leetcode-medium h-2 rounded-full" style="width: ${(completedCount / pattern.count) * 100}%"></div>
+                            </div>
+                        </div>
+                        <ul class="divide-y divide-gray-200 max-h-80 overflow-y-auto">
+                            ${pattern.problems.map(problem => `
+                                <li class="problem-item p-3 flex items-center ${problem.completed ? 'completed-problem' : ''}" data-difficulty="${problem.difficulty}" data-status="${problem.completed ? 'complete' : 'incomplete'}">
+                                    <input type="checkbox" id="problem-${problem.number}" ${problem.completed ? 'checked' : ''} 
+                                        class="problem-checkbox h-5 w-5 text-blue-600 rounded focus:ring-blue-500">
+                                    <label for="problem-${problem.number}" class="ml-3 flex flex-col cursor-pointer">
+                                        <span class="text-sm font-medium">${problem.number}. ${problem.name}</span>
+                                        <span class="text-xs ${getDifficultyColor(problem.difficulty)}">${problem.difficulty.charAt(0).toUpperCase() + problem.difficulty.slice(1)}</span>
+                                    </label>
+                                    <div class="ml-auto flex space-x-2">
+                                        <a href="https://leetcode.com/problems/${problem.name.toLowerCase().replace(/\s+/g, '-').replace(/[()]/g, '')}/" target="_blank" 
+                                           class="text-blue-500 hover:text-blue-700" title="View on LeetCode">
+                                            <i class="fas fa-external-link-alt"></i>
+                                        </a>
+                                    </div>
+                                </li>
+                            `).join('')}
+                        </ul>
+                    </div>
+                `;
+                
+                container.appendChild(patternElement);
+                
+                // Add event listener to toggle section
+                const header = patternElement.querySelector('.pattern-header');
+                header.addEventListener('click', function() {
+                    const problems = this.nextElementSibling;
+                    const icon = this.querySelector('.toggle-icon');
+                    
+                    if (problems.style.display === 'none') {
+                        problems.style.display = 'block';
+                        icon.textContent = '▼';
+                    } else {
+                        problems.style.display = 'none';
+                        icon.textContent = '▶';
+                    }
+                });
+                
+                // Add event listeners to checkboxes
+                patternElement.querySelectorAll('.problem-checkbox').forEach(checkbox => {
+                    checkbox.addEventListener('change', function() {
+                        const problemNumber = this.id.replace('problem-', '');
+                        const problem = findProblem(parseInt(problemNumber));
+                        if (problem) {
+                            problem.completed = this.checked;
+                            saveProgress(problemNumber, this.checked);
+                            
+                            // Update UI
+                            const listItem = this.closest('.problem-item');
+                            if (this.checked) {
+                                listItem.classList.add('completed-problem');
+                                listItem.setAttribute('data-status', 'complete');
+                            } else {
+                                listItem.classList.remove('completed-problem');
+                                listItem.setAttribute('data-status', 'incomplete');
+                            }
+                            
+                            // Update pattern progress
+                            const completedCount = pattern.problems.filter(p => p.completed).length;
+                            const patternHeader = patternElement.querySelector('.pattern-header h2');
+                            patternHeader.textContent = `${pattern.name} (${completedCount}/${pattern.count})`;
+                            
+                            const progressBar = patternElement.querySelector('.pattern-problems > div > div > div');
+                            progressBar.style.width = `${(completedCount / pattern.count) * 100}%`;
+                            
+                            const progressText = patternElement.querySelector('.pattern-problems > div > div > span:last-child');
+                            progressText.textContent = `${Math.round((completedCount / pattern.count) * 100)}%`;
+                        }
+                    });
+                });
+            });
+        }
+
+        // Find a problem by number
+        function findProblem(number) {
+            for (const pattern of patterns) {
+                for (const problem of pattern.problems) {
+                    if (problem.number === number) {
+                        return problem;
+                    }
+                }
+            }
+            return null;
+        }
+
+        // Update overall progress
+        function updateOverallProgress() {
+            let total = 0;
+            let completed = 0;
+            let easyCount = 0;
+            let mediumCount = 0;
+            let hardCount = 0;
+            let easyCompleted = 0;
+            let mediumCompleted = 0;
+            let hardCompleted = 0;
+            
+            patterns.forEach(pattern => {
+                pattern.problems.forEach(problem => {
+                    total++;
+                    if (problem.completed) completed++;
+                    
+                    if (problem.difficulty === 'easy') {
+                        easyCount++;
+                        if (problem.completed) easyCompleted++;
+                    } else if (problem.difficulty === 'medium') {
+                        mediumCount++;
+                        if (problem.completed) mediumCompleted++;
+                    } else if (problem.difficulty === 'hard') {
+                        hardCount++;
+                        if (problem.completed) hardCompleted++;
+                    }
+                });
+            });
+            
+            const percentage = Math.round((completed / total) * 100);
+            document.getElementById('overall-progress').textContent = `${completed}/${total} (${percentage}%)`;
+            document.getElementById('progress-bar').style.width = `${percentage}%`;
+            
+            document.getElementById('easy-count').textContent = `${easyCompleted}/${easyCount}`;
+            document.getElementById('medium-count').textContent = `${mediumCompleted}/${mediumCount}`;
+            document.getElementById('hard-count').textContent = `${hardCompleted}/${hardCount}`;
+        }
+
+        // Get color class for difficulty
+        function getDifficultyColor(difficulty) {
+            switch (difficulty) {
+                case 'easy': return 'text-leetcode-easy';
+                case 'medium': return 'text-leetcode-medium';
+                case 'hard': return 'text-leetcode-hard';
+                default: return 'text-gray-500';
+            }
+        }
+
+        // Filter problems based on selection
+        function filterProblems(filter) {
+            document.querySelectorAll('.problem-item').forEach(item => {
+                const difficulty = item.getAttribute('data-difficulty');
+                const status = item.getAttribute('data-status');
+                
+                if (filter === 'all') {
+                    item.style.display = 'flex';
+                } else if (filter === 'easy' && difficulty === 'easy') {
+                    item.style.display = 'flex';
+                } else if (filter === 'medium' && difficulty === 'medium') {
+                    item.style.display = 'flex';
+                } else if (filter === 'hard' && difficulty === 'hard') {
+                    item.style.display = 'flex';
+                } else if (filter === 'complete' && status === 'complete') {
+                    item.style.display = 'flex';
+                } else if (filter === 'incomplete' && status === 'incomplete') {
+                    item.style.display = 'flex';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+            
+            // Update active filter button
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                if (btn.getAttribute('data-filter') === filter) {
+                    btn.classList.add('bg-blue-100', 'text-blue-800');
+                } else {
+                    btn.classList.remove('bg-blue-100', 'text-blue-800');
+                }
+            });
+        }
+    </script>
+</body>
+</html>
